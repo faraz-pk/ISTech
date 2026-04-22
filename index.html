@@ -35,21 +35,11 @@
   </nav>
 
   <!-- ===== HERO ===== -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="hero-bg-shape"></div>
     <div class="hero-bg-shape2"></div>
     <div class="container hero-inner">
       <div class="hero-content">
-        <!-- Toggle Buttons -->
-        <div class="hero-toggle-buttons">
-          <button class="toggle-btn active" data-category="courses">
-            <span class="toggle-icon">📚</span> Courses
-          </button>
-          <button class="toggle-btn" data-category="services">
-            <span class="toggle-icon">⚙️</span> Services
-          </button>
-        </div>
-
         <!-- Courses Content -->
         <div class="hero-category-content active" id="courses-content">
           <div class="hero-pill">
@@ -89,6 +79,12 @@
             <a href="contact.html" class="btn btn-outline">Get a Consultation →</a>
           </div>
         </div>
+
+        <!-- Toggle Button -->
+        <button class="hero-switch-btn" id="heroSwitchBtn" data-category="courses">
+          <span class="switch-icon">⚙️</span>
+          <span class="switch-text">Switch to Services</span>
+        </button>
 
         <div class="hero-stats">
           <div class="hero-stat">

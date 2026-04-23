@@ -5,7 +5,7 @@
 /* ---------- Hero ---------- */
 .hero {
   min-height: 100vh;
-  padding: calc(var(--nav-h) + 60px) 0 80px;
+  padding: calc(var(--nav-h) + 35px) 0 80px;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -80,7 +80,7 @@
   font-size: 13px;
   color: var(--accent);
   font-weight: 500;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   transition: all 0.6s ease;
 }
 
@@ -108,11 +108,11 @@
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(38px, 5.5vw, 64px);
+  font-size: clamp(38px, 5.5vw, 41px);
   font-weight: 800;
   line-height: 1.08;
   color: var(--primary);
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   transition: color 0.6s ease;
 }
 
@@ -145,7 +145,7 @@
   color: var(--text-muted);
   max-width: 480px;
   line-height: 1.75;
-  margin-bottom: 36px;
+  margin-bottom: 12px;
   font-weight: 300;
   transition: color 0.6s ease;
 }
@@ -158,7 +158,7 @@
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 48px;
+  margin-bottom: 22px;
 }
 
 /* Switch Button */
@@ -177,7 +177,7 @@
   cursor: pointer;
   transition: all 0.4s ease;
   box-shadow: 0 4px 12px rgba(0,194,168,0.2);
-  margin-bottom: 48px;
+  margin-bottom: 20px;
   position: relative;
 }
 
@@ -323,22 +323,22 @@
 
 .hcard-1 {
   top: 20px; left: 30px;
-  width: 280px;
+  width: 300px;
   transform: rotate(-8deg);
   z-index: 30;
   animation: cardFloat1 6s ease-in-out infinite;
 }
 
 .hcard-2 {
-  top: 100px; right: 20px;
-  width: 290px;
+  top: 134px; right: 20px;
+  width: 300px;
   transform: rotate(5deg);
   z-index: 20;
   animation: cardFloat2 7s ease-in-out infinite;
 }
 
 .hcard-3 {
-  bottom: 60px; left: 50px;
+  bottom: 92px; left: 50px;
   width: 260px;
   transform: rotate(-3deg);
   z-index: 10;
@@ -346,7 +346,7 @@
 }
 
 .hcard-4 {
-  bottom: 40px; right: 60px;
+  bottom: -14px; right: 60px;
   width: 270px;
   transform: rotate(4deg);
   z-index: 5;

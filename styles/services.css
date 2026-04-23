@@ -94,6 +94,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  margin-top: 15px;
 }
 
 .erp-sol-card {
@@ -343,7 +344,7 @@
 /* ---------- Services CTA ---------- */
 .services-cta {
   background: linear-gradient(135deg, var(--primary) 0%, #0d3a6e 100%);
-  padding: 72px 0;
+  padding: 60px 0;
   position: relative;
   overflow: hidden;
 }

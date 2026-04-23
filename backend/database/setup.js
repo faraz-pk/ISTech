@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 
 async function setupDatabase() {
   try {
@@ -13,7 +14,7 @@ async function setupDatabase() {
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'istech_db'}`);
     await connection.query(`USE ${process.env.DB_NAME || 'istech_db'}`);
 
-    const migrationFile = fs.readFileSync(path.join(__dirname, 'migrations/001_create_users_table.sql'), 'utf8');
+    const migrationFile = fs.readFileSync(path.join(__dirname, '../migrations/001_create_users_table.sql'), 'utf8');
     await connection.query(migrationFile);
 
     console.log('✅ Database setup complete!');

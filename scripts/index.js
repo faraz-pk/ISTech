@@ -19,6 +19,7 @@ const servicesContent = document.getElementById('services-content');
 const coursesVisual = document.getElementById('courses-visual');
 const servicesVisual = document.getElementById('services-visual');
 
+const HERO_MODE_KEY = 'istechHeroMode';
 let isCoursesMode = true;
 
 const statElements = {
@@ -40,9 +41,7 @@ const statElements = {
   }
 };
 
-heroSwitchBtn.addEventListener('click', () => {
-  isCoursesMode = !isCoursesMode;
-  
+function applyHeroMode() {
   if (isCoursesMode) {
     // Switch to Courses (Light mode)
     hero.classList.remove('dark-mode');
@@ -78,6 +77,28 @@ heroSwitchBtn.addEventListener('click', () => {
     document.getElementById('stat-label-2').textContent = statElements.services.label2;
     document.getElementById('stat-label-3').textContent = statElements.services.label3;
   }
+
+  try {
+    localStorage.setItem(HERO_MODE_KEY, isCoursesMode ? 'courses' : 'services');
+  } catch (_) {
+    // Ignore storage errors and keep runtime behavior.
+  }
+}
+
+try {
+  const savedMode = localStorage.getItem(HERO_MODE_KEY);
+  if (savedMode === 'services') {
+    isCoursesMode = false;
+  }
+} catch (_) {
+  // Ignore storage read errors and use default mode.
+}
+
+applyHeroMode();
+
+heroSwitchBtn.addEventListener('click', () => {
+  isCoursesMode = !isCoursesMode;
+  applyHeroMode();
 });
 
 // Reveal on scroll

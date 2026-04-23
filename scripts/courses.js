@@ -17,6 +17,10 @@
     const cards = document.querySelectorAll('.full-course-card');
     const countEl = document.getElementById('courseCount');
 
+    if (countEl) {
+      countEl.textContent = cards.length;
+    }
+
     filterTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         filterTabs.forEach(t => t.classList.remove('active'));

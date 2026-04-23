@@ -3,13 +3,14 @@ const router = express.Router();
 const sendEmail = require("../utils/sendEmail");
 
 router.post("/", async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, subject, message } = req.body;
 
   try {
-    await sendEmail(name, email, message);
+    await sendEmail(name, email, subject, message);
     res.json({ message: "Email sent successfully!" });
   } catch (error) {
-    res.status(500).json({ message: "Error sending email" });
+    console.error("Email send error:", error);
+    res.status(500).json({ message: "Error sending email", error: error.message });
   }
 });
 

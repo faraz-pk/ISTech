@@ -108,7 +108,7 @@
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(38px, 5.5vw, 41px);
+  font-size: clamp(38px, 5.5vw, 48px);
   font-weight: 800;
   line-height: 1.08;
   color: var(--primary);
@@ -339,7 +339,7 @@
 
 .hcard-3 {
   bottom: 92px; left: 50px;
-  width: 260px;
+  width: 300px;
   transform: rotate(-3deg);
   z-index: 10;
   animation: cardFloat3 8s ease-in-out infinite;
@@ -463,13 +463,22 @@
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  overflow: hidden;
 }
 
-.trust-bar .container {
+.trust-scroll {
+  display: flex;
+  animation: slideHorizontal 30s linear infinite;
+  will-change: transform;
+}
+
+.trust-scroll-wrapper {
   display: flex;
   align-items: center;
   gap: 32px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
 }
 
 .trust-label {
@@ -484,7 +493,7 @@
 .trust-logos {
   display: flex;
   gap: 32px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .trust-logos span {
@@ -495,9 +504,20 @@
   transition: opacity var(--transition);
   letter-spacing: 0.03em;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .trust-logos span:hover { opacity: 1; }
+
+@keyframes slideHorizontal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 
 /* ---------- Intro Section ---------- */
 .intro-grid {

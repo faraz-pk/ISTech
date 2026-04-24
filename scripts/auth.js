@@ -1,7 +1,8 @@
 // Auth utility functions
 // DEPLOYMENT NOTE: Change this URL to your production domain when deploying
 // For example: "https://istech.com" or "https://api.istech.com"
-const API_BASE = "http://localhost:5001";
+//! const API_BASE = "http://localhost:5001";
+const API_BASE = "https://istech-production.up.railway.app/";
 
 class AuthManager {
   static getToken() {

@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Password toggle
-  // Password toggle
   document.getElementById("pwToggle").addEventListener("click", function (e) {
     e.preventDefault();
     const pw = document.getElementById("password");
@@ -70,7 +69,8 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         // DEPLOYMENT NOTE: This API endpoint will change to your production domain
         // For example: "https://istech.com/api/auth/login" or "https://api.istech.com/api/auth/login"
-        const response = await fetch("http://localhost:5001/api/auth/login", {
+        //! const response = await fetch("http://localhost:5001/api/auth/login", {
+        const response = await fetch("https://istech-production.up.railway.app/api/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -196,7 +196,8 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // DEPLOYMENT NOTE: This API endpoint will change to your production domain
       // For example: "https://istech.com/api/auth/forgot-password" or "https://api.istech.com/api/auth/forgot-password"
-      const response = await fetch("http://localhost:5001/api/auth/forgot-password", {
+      //! const response = await fetch("http://localhost:5001/api/auth/forgot-password", {
+      const response = await fetch("https://istech-production.up.railway.app//api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })

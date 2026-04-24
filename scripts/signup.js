@@ -182,7 +182,8 @@ document.getElementById("step3Next").addEventListener("click", async () => {
   try {
     // DEPLOYMENT NOTE: This API endpoint will change to your production domain
     // For example: "https://istech.com/api/auth/signup" or "https://api.istech.com/api/auth/signup"
-    const response = await fetch("http://localhost:5001/api/auth/signup", {
+    //! const response = await fetch("http://localhost:5001/api/auth/signup", {
+    const response = await fetch("https://istech-production.up.railway.app//api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -239,7 +240,8 @@ document.getElementById("verifyBtn").addEventListener("click", async function ()
   try {
     // DEPLOYMENT NOTE: This API endpoint will change to your production domain
     // For example: "https://istech.com/api/auth/verify-otp" or "https://api.istech.com/api/auth/verify-otp"
-    const response = await fetch("http://localhost:5001/api/auth/verify-otp", {
+    //! const response = await fetch("http://localhost:5001/api/auth/verify-otp", {
+    const response = await fetch("https://istech-production.up.railway.app//api/auth/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -68,6 +68,8 @@ document.addEventListener("DOMContentLoaded", function () {
       txt.textContent = "Logging in…";
 
       try {
+        // DEPLOYMENT NOTE: This API endpoint will change to your production domain
+        // For example: "https://istech.com/api/auth/login" or "https://api.istech.com/api/auth/login"
         const response = await fetch("http://localhost:5001/api/auth/login", {
           method: "POST",
           headers: {
@@ -192,6 +194,8 @@ document.addEventListener("DOMContentLoaded", function () {
     txt.textContent = "Sending…";
 
     try {
+      // DEPLOYMENT NOTE: This API endpoint will change to your production domain
+      // For example: "https://istech.com/api/auth/forgot-password" or "https://api.istech.com/api/auth/forgot-password"
       const response = await fetch("http://localhost:5001/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

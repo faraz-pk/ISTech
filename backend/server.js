@@ -6,11 +6,15 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const app = express();
 
 // Middleware
+// DEPLOYMENT NOTE: Update CORS origin to allow your production domain
+// For example: origin: "https://istech.com" or use environment variable
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
+    // DEPLOYMENT NOTE: Replace localhost origins with your production domain
+    // For example: if (origin === "https://istech.com") return callback(null, true);
     // Allow localhost and 127.0.0.1 on any port
     if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
       return callback(null, true);
@@ -48,7 +52,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+// DEPLOYMENT NOTE: Server will listen on PORT from environment or 5001
+// In production, hosting providers usually set process.env.PORT automatically
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
+  // DEPLOYMENT NOTE: This console.log is for development - remove or modify for production
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

@@ -4,6 +4,7 @@ require('dotenv').config();
 async function createDatabase() {
   try {
     // Connect without specifying a database
+    // DEPLOYMENT NOTE: Update database connection for production
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USER || 'root',

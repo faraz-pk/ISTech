@@ -40,6 +40,8 @@ async function createTables() {
     console.log('✅ Tables created successfully');
     connection.release();
   } catch (error) {
+    // DEPLOYMENT NOTE: Update this message for production database connection
+    // For cloud databases, this warning will be different
     console.warn('⚠️  Database not available. Skipping table creation. Make sure MySQL is running on localhost:3306');
   }
 }

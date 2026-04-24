@@ -2,6 +2,8 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 // Create connection pool
+// DEPLOYMENT NOTE: Update database configuration for production
+// For cloud databases like AWS RDS, use connection strings or environment variables
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',

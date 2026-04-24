@@ -16,10 +16,7 @@ app.use(cors({
     // DEPLOYMENT NOTE: Replace localhost origins with your production domain
     // For example: if (origin === "https://istech.com") return callback(null, true);
     // Allow localhost and 127.0.0.1 on any port
-    //! if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
-    //!   return callback(null, true);
-    //! }
-    if (origin === "http://istechsolution.netlify.app/") {
+    if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
       return callback(null, true);
     }
     

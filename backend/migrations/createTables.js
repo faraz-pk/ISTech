@@ -24,7 +24,20 @@ async function createTables() {
       )
     `);
 
-    console.log('✅ Users table created successfully');
+    // Create otps table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS otps (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        email VARCHAR(100) NOT NULL,
+        otp VARCHAR(6) NOT NULL,
+        expiresAt TIMESTAMP NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_email (email),
+        INDEX idx_expires (expiresAt)
+      )
+    `);
+
+    console.log('✅ Tables created successfully');
     connection.release();
   } catch (error) {
     console.warn('⚠️  Database not available. Skipping table creation. Make sure MySQL is running on localhost:3306');

@@ -10,18 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Show alert function
   function showAlert(message, type = "error") {
-    const alertContainer = document.getElementById("alertContainer");
-    const alertText = document.getElementById("alertText");
-    const alertIcon = document.getElementById("alertIcon");
-
-    alertContainer.className = "alert-container " + type;
-    alertText.textContent = message;
-    alertIcon.textContent = type === "success" ? "✓" : "⚠️";
-
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-      alertContainer.classList.remove("success", "error");
-    }, 5000);
+    NotificationManager.show(message, type);
   }
 
   // Clear field errors
@@ -172,7 +161,56 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".social-auth-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-      showAlert("Social login coming soon!", "error");
+      showAlert("Google login coming soon! Requires OAuth setup.", "info");
     });
+  });
+
+  // Forgot password
+  document.querySelector(".forgot-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("forgotModal").classList.remove("hidden");
+  });
+
+  document.getElementById("forgotClose").addEventListener("click", () => {
+    document.getElementById("forgotModal").classList.add("hidden");
+  });
+
+  document.getElementById("forgotForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("forgotEmail").value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      document.getElementById("forgotEmailError").textContent = "Valid email required";
+      return;
+    }
+    document.getElementById("forgotEmailError").textContent = "";
+
+    const btn = document.getElementById("forgotBtn");
+    const txt = document.getElementById("forgotBtnText");
+    btn.disabled = true;
+    txt.textContent = "Sending…";
+
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        NotificationManager.show("Reset link sent to your email!", "success");
+        document.getElementById("forgotModal").classList.add("hidden");
+      } else {
+        NotificationManager.show(data.message || "Error sending reset link", "error");
+      }
+    } catch (error) {
+      NotificationManager.show("Error: " + error.message, "error");
+    } finally {
+      btn.disabled = false;
+      txt.textContent = "Send Reset Link";
+    }
   });
 });

@@ -8,7 +8,7 @@ const subjectLabels = {
   other: "Other",
 };
 
-const sendEmail = async (name, email, subject, message) => {
+const sendEmail = async (name, recipientEmail, subject, message, userEmail) => {
   const readableSubject = subjectLabels[subject] || subject || "General Inquiry";
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -18,12 +18,14 @@ const sendEmail = async (name, email, subject, message) => {
     },
   });
 
+  // Use userEmail if provided, otherwise use recipientEmail as fallback
+  const emailToDisplay = userEmail || recipientEmail;
+
   const mailOptions = {
-    from: `ISTech Contact Form <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
-    replyTo: email,
+    from: `ISTech <${process.env.EMAIL_USER}>`,
+    to: recipientEmail,
     subject: readableSubject,
-    text: `Name: ${name}\nEmail: ${email}\nSubject: ${readableSubject}\nMessage: ${message}`,
+    text: `Name: ${name}\nEmail: ${emailToDisplay}\nSubject: ${readableSubject}\nMessage: ${message}`,
   };
 
   await transporter.sendMail(mailOptions);

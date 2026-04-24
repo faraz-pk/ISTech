@@ -23,7 +23,6 @@ const observer = new IntersectionObserver(
 reveals.forEach((el) => observer.observe(el));
 
 // Form validation & submission
-const API_BASE = "http://localhost:5001";
 const form = document.getElementById("contactForm");
 const successEl = document.getElementById("formSuccess");
 
@@ -65,9 +64,7 @@ document
   .addEventListener("blur", () =>
     validateField("lastName", "lastNameError", "Last name is required."),
   );
-document
-  .getElementById("email")
-  .addEventListener("blur", () => validateEmail("email", "emailError"));
+// Removed email validation
 document
   .getElementById("subject")
   .addEventListener("blur", () =>
@@ -82,6 +79,13 @@ document
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Check authentication
+  if (!AuthManager.getToken()) {
+    NotificationManager.show("Please log in to submit the contact form.", "warning");
+    setTimeout(() => window.location.href = "login.html", 2000);
+    return;
+  }
+
   const v1 = validateField(
     "firstName",
     "firstNameError",
@@ -92,19 +96,20 @@ form.addEventListener("submit", async (e) => {
     "lastNameError",
     "Last name is required.",
   );
-  const v3 = validateEmail("email", "emailError");
-  const v4 = validateField(
+  // Removed email validation
+  const v3 = validateField(
     "subject",
     "subjectError",
     "Please select a subject.",
   );
-  const v5 = validateField("message", "messageError", "Message is required.");
+  const v4 = validateField("message", "messageError", "Message is required.");
 
-  if (!v1 || !v2 || !v3 || !v4 || !v5) return;
+  if (!v1 || !v2 || !v3 || !v4) return;
 
   const firstName = document.getElementById("firstName").value.trim();
   const lastName = document.getElementById("lastName").value.trim();
-  const email = document.getElementById("email").value.trim();
+  const user = AuthManager.getUser();
+  const email = user ? user.email : '';
   const subject = document.getElementById("subject").value.trim();
   const message = document.getElementById("message").value.trim();
 
@@ -128,6 +133,7 @@ form.addEventListener("submit", async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${AuthManager.getToken()}`
       },
       body: JSON.stringify(payload),
     });
@@ -141,8 +147,9 @@ form.addEventListener("submit", async (e) => {
     form.style.display = "none";
     successEl.style.display = "flex";
     document.querySelector(".form-header").style.display = "none";
+    NotificationManager.show("Message sent successfully!", "success");
   } catch (error) {
-    alert(error.message || "Something went wrong while sending your message.");
+    NotificationManager.show(error.message || "Something went wrong while sending your message.", "error");
   } finally {
     btn.disabled = false;
     btnText.textContent = originalText;

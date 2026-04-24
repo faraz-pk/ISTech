@@ -16,42 +16,19 @@ function validatePassword(password) {
 }
 
 // ============================================
-// SIGNUP ROUTE
+// SEND OTP ROUTE
 // ============================================
-router.post('/signup', async (req, res) => {
-  const { firstName, lastName, email, password, phone, courseInterest, learningMode } = req.body;
+router.post('/send-otp', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || !validateEmail(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Valid email is required'
+    });
+  }
 
   try {
-    // Validation
-    if (!firstName || !firstName.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'First name is required' 
-      });
-    }
-
-    if (!lastName || !lastName.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Last name is required' 
-      });
-    }
-
-    if (!email || !validateEmail(email)) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Valid email is required' 
-      });
-    }
-
-    if (!validatePassword(password)) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Password must be at least 8 characters' 
-      });
-    }
-
-    // Get database connection
     const connection = await pool.getConnection();
 
     try {
@@ -62,9 +39,110 @@ router.post('/signup', async (req, res) => {
       );
 
       if (existingUsers.length > 0) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           success: false,
-          message: 'Email already registered. Please log in or use a different email.' 
+          message: 'Email already registered. Please log in or use a different email.'
+        });
+      }
+
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Delete any existing OTP for this email
+      await connection.query('DELETE FROM otps WHERE email = ?', [email.toLowerCase()]);
+
+      // Insert new OTP (expires in 10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await connection.query(
+        'INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)',
+        [email.toLowerCase(), otp, expiresAt]
+      );
+
+      // Send OTP email
+      const sendEmail = require('../utils/sendEmail');
+      await sendEmail(
+        'ISTech Support',
+        email,
+        'Your OTP for Signup',
+        `Your OTP for signup is: ${otp}. It expires in 10 minutes.`
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'OTP sent to your email'
+      });
+
+    } finally {
+      connection.release();
+    }
+
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error sending OTP. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================
+// VERIFY OTP ROUTE
+// ============================================
+router.post('/verify-otp', async (req, res) => {
+  const { email, otp, firstName, lastName, password, phone, courseInterest, learningMode } = req.body;
+
+  if (!email || !validateEmail(email) || !otp) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and OTP are required'
+    });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+
+    try {
+      // Get OTP from database
+      const [otps] = await connection.query(
+        'SELECT otp, expiresAt FROM otps WHERE email = ? AND expiresAt > NOW() ORDER BY createdAt DESC LIMIT 1',
+        [email.toLowerCase()]
+      );
+
+      if (otps.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'OTP not found or expired'
+        });
+      }
+
+      if (otps[0].otp !== otp) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid OTP'
+        });
+      }
+
+      // OTP verified, now create account
+      // Validation
+      if (!firstName || !firstName.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'First name is required'
+        });
+      }
+
+      if (!lastName || !lastName.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Last name is required'
+        });
+      }
+
+      if (!validatePassword(password)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Password must be at least 8 characters'
         });
       }
 
@@ -88,6 +166,9 @@ router.post('/signup', async (req, res) => {
 
       const userId = result.insertId;
 
+      // Delete used OTP
+      await connection.query('DELETE FROM otps WHERE email = ?', [email.toLowerCase()]);
+
       // Create JWT token
       const token = jwt.sign(
         { id: userId, email: email.toLowerCase() },
@@ -97,7 +178,7 @@ router.post('/signup', async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: 'Signup successful! You can now log in.',
+        message: 'Account created successfully!',
         token,
         user: {
           id: userId,
@@ -112,10 +193,105 @@ router.post('/signup', async (req, res) => {
     }
 
   } catch (error) {
+    console.error('Verify OTP error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error verifying OTP. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================
+// SIGNUP ROUTE (Now just sends OTP)
+// ============================================
+router.post('/signup', async (req, res) => {
+  const { firstName, lastName, email, password, phone, courseInterest, learningMode } = req.body;
+
+  try {
+    // Basic validation
+    if (!firstName || !firstName.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name is required'
+      });
+    }
+
+    if (!lastName || !lastName.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Last name is required'
+      });
+    }
+
+    if (!email || !validateEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid email is required'
+      });
+    }
+
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters'
+      });
+    }
+
+    // Get database connection
+    const connection = await pool.getConnection();
+
+    try {
+      // Check if user already exists
+      const [existingUsers] = await connection.query(
+        'SELECT id FROM users WHERE email = ?',
+        [email.toLowerCase()]
+      );
+
+      if (existingUsers.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: 'Email already registered. Please log in or use a different email.'
+        });
+      }
+
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Delete any existing OTP for this email
+      await connection.query('DELETE FROM otps WHERE email = ?', [email.toLowerCase()]);
+
+      // Insert new OTP (expires in 10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await connection.query(
+        'INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)',
+        [email.toLowerCase(), otp, expiresAt]
+      );
+
+      // Send OTP email
+      const sendEmail = require('../utils/sendEmail');
+      await sendEmail(
+        'ISTech Support',
+        email,
+        'Your OTP for Signup',
+        `Your OTP for signup is: ${otp}. It expires in 10 minutes.`
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'OTP sent to your email. Please verify to complete signup.',
+        requiresOtp: true
+      });
+
+    } finally {
+      connection.release();
+    }
+
+  } catch (error) {
     console.error('Signup error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error creating account. Please try again.',
+      message: 'Error during signup. Please try again.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -248,6 +424,89 @@ router.post('/verify-token', (req, res) => {
       message: 'Invalid token'
     });
   }
+});
+
+// ============================================
+// FORGOT PASSWORD ROUTE
+// ============================================
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || !validateEmail(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Valid email is required'
+    });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+
+    try {
+      // Check if user exists
+      const [users] = await connection.query(
+        'SELECT id FROM users WHERE email = ?',
+        [email.toLowerCase()]
+      );
+
+      if (users.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'No account found with this email'
+        });
+      }
+
+      // Generate reset OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Delete any existing OTP for this email
+      await connection.query('DELETE FROM otps WHERE email = ?', [email.toLowerCase()]);
+
+      // Insert new OTP (expires in 10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await connection.query(
+        'INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)',
+        [email.toLowerCase(), otp, expiresAt]
+      );
+
+      // Send reset OTP email
+      const sendEmail = require('../utils/sendEmail');
+      await sendEmail(
+        'ISTech Support',
+        email,
+        'Password Reset OTP',
+        `Your password reset OTP is: ${otp}. It expires in 10 minutes.`
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Password reset OTP sent to your email'
+      });
+
+    } finally {
+      connection.release();
+    }
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error sending reset OTP. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================
+// LOGOUT ROUTE
+// ============================================
+router.post('/logout', (req, res) => {
+  // Since JWT is stateless, logout is handled on client side
+  // But we can blacklist the token if needed
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully'
+  });
 });
 
 // ============================================

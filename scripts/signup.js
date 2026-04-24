@@ -1,6 +1,8 @@
 // Social placeholder
 document.querySelectorAll(".social-auth-btn").forEach((btn) => {
-  btn.addEventListener("click", () => alert("Social sign-up coming soon!"));
+  btn.addEventListener("click", () => {
+    NotificationManager.show("Google signup coming soon! Requires OAuth setup.", "info");
+  });
 });
 
 // Load courses dynamically from courses.html
@@ -80,7 +82,7 @@ document
 
 // Step navigation helpers
 function setStep(n) {
-  [1, 2, 3].forEach((i) => {
+  [1, 2, 3, 4].forEach((i) => {
     document.getElementById(`step${i}`).classList.toggle("hidden", i !== n);
     document.getElementById(`step${i}dot`).classList.toggle("active", i <= n);
   });
@@ -162,57 +164,122 @@ document
   .getElementById("step3Back")
   .addEventListener("click", () => setStep(2));
 
-// Final submit
-// Final submit
-document
-  .getElementById("signupForm")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const terms = document.getElementById("terms");
-    if (!terms.checked) {
-      document.getElementById("termsError").textContent =
-        "You must agree to the terms.";
-      return;
+// Step 3 next: Send OTP
+document.getElementById("step3Next").addEventListener("click", async () => {
+  const terms = document.getElementById("terms");
+  if (!terms.checked) {
+    document.getElementById("termsError").textContent =
+      "You must agree to the terms.";
+    return;
+  }
+  document.getElementById("termsError").textContent = "";
+
+  const btn = document.getElementById("step3Next");
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = "Sending OTP…";
+
+  try {
+    const response = await fetch("http://localhost:5001/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        email: document.getElementById("signupEmail").value,
+        password: document.getElementById("signupPassword").value,
+        courseInterest: document.getElementById("courseInterest").value,
+        learningMode: document.getElementById("learningMode").value,
+        phone: document.getElementById("phone").value,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      NotificationManager.show("OTP sent to your email!", "success");
+      setStep(4);
+    } else {
+      NotificationManager.show(data.message || "Error sending OTP", "error");
     }
-    document.getElementById("termsError").textContent = "";
+  } catch (error) {
+    NotificationManager.show("Error sending OTP: " + error.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+});
 
-    const btn = document.getElementById("signupBtn");
-    const txt = document.getElementById("signupBtnText");
-    btn.disabled = true;
-    txt.textContent = "Creating account…";
+// Step 4 back
+document.getElementById("step4Back").addEventListener("click", () => setStep(3));
 
-    try {
-      const response = await fetch("http://localhost:5001/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: document.getElementById("firstName").value,
-          lastName: document.getElementById("lastName").value,
-          email: document.getElementById("signupEmail").value,
-          password: document.getElementById("signupPassword").value,
-          courseInterest: document.getElementById("courseInterest").value,
-          learningMode: document.getElementById("learningMode").value,
-          phone: document.getElementById("phone").value,
-        }),
-      });
+// Step 4: Verify OTP
+document.getElementById("otp").addEventListener("input", function () {
+  document.getElementById("otpError").textContent = "";
+  this.classList.remove("error");
+});
 
-      const data = await response.json();
+document.getElementById("verifyBtn").addEventListener("click", async function () {
+  const otp = document.getElementById("otp").value.trim();
+  if (!otp || otp.length !== 6) {
+    document.getElementById("otpError").textContent = "Please enter a valid 6-digit OTP";
+    document.getElementById("otp").classList.add("error");
+    return;
+  }
+  document.getElementById("otpError").textContent = "";
+  document.getElementById("otp").classList.remove("error");
 
-      if (response.ok) {
-        document.querySelector(".auth-form").classList.add("hidden");
-        document.querySelector(".step-indicator").classList.add("hidden");
-        document.querySelector(".auth-divider").classList.add("hidden");
-        document.querySelector(".social-auth").classList.add("hidden");
-        document.querySelector(".auth-form-header").style.display = "none";
-        document.getElementById("signupSuccess").classList.remove("hidden");
-      } else {
-        alert("Error: " + data.message);
-        btn.disabled = false;
-        txt.textContent = "Create Account";
-      }
-    } catch (error) {
-      alert("Error creating account: " + error.message);
-      btn.disabled = false;
-      txt.textContent = "Create Account";
+  const btn = document.getElementById("verifyBtn");
+  const txt = document.getElementById("verifyBtnText");
+  btn.disabled = true;
+  txt.textContent = "Verifying…";
+
+  try {
+    const response = await fetch("http://localhost:5001/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("signupEmail").value,
+        otp: otp,
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        password: document.getElementById("signupPassword").value,
+        courseInterest: document.getElementById("courseInterest").value,
+        learningMode: document.getElementById("learningMode").value,
+        phone: document.getElementById("phone").value,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Store auth data
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("userName", `${data.user.firstName} ${data.user.lastName}`);
+
+      document.querySelector(".auth-form").classList.add("hidden");
+      document.querySelector(".step-indicator").classList.add("hidden");
+      document.querySelector(".auth-divider").classList.add("hidden");
+      document.querySelector(".social-auth").classList.add("hidden");
+      document.querySelector(".auth-form-header").style.display = "none";
+      document.getElementById("signupSuccess").classList.remove("hidden");
+      NotificationManager.show("Account created successfully! You are now logged in.", "success");
+
+      // Redirect after delay
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 2000);
+    } else {
+      // OTP mismatch - show error and allow user to retry
+      document.getElementById("otpError").textContent = data.message || "Invalid OTP. Please try again.";
+      document.getElementById("otp").classList.add("error");
+      NotificationManager.show(data.message || "Invalid OTP. Please try again.", "error");
     }
-  });
+  } catch (error) {
+    NotificationManager.show("Error verifying OTP: " + error.message, "error");
+  } finally {
+    btn.disabled = false;
+    txt.textContent = "Verify OTP";
+  }
+});

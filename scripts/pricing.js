@@ -29,4 +29,16 @@
       });
     }, { threshold: 0.08 });
     reveals.forEach(el => observer.observe(el));
+
+    // Auth check for pricing buttons
+    document.querySelectorAll('.pc-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (!AuthManager.getToken()) {
+          e.preventDefault();
+          NotificationManager.show("Please log in to access pricing plans.", "warning");
+          setTimeout(() => window.location.href = "login.html", 2000);
+          return false;
+        }
+      });
+    });
   

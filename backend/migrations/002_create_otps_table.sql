@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS otps (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(100) NOT NULL,
+  otp VARCHAR(6) NOT NULL,
+  expiresAt TIMESTAMP NOT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_expires (expiresAt)
+);

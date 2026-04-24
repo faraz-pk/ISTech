@@ -3,6 +3,48 @@ document.querySelectorAll(".social-auth-btn").forEach((btn) => {
   btn.addEventListener("click", () => alert("Social sign-up coming soon!"));
 });
 
+// Load courses dynamically from courses.html
+async function loadCourses() {
+  try {
+    const response = await fetch('./courses.html');
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const courseElements = doc.querySelectorAll('.full-course-card h3');
+    const courses = Array.from(courseElements).map(el => el.textContent.trim());
+    
+    const select = document.getElementById('courseInterest');
+    // Clear existing options except the first
+    select.innerHTML = '<option value="" disabled selected>Select a course…</option>';
+    // Add new options
+    courses.forEach(course => {
+      const option = document.createElement('option');
+      option.value = course;
+      option.textContent = course;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading courses:', error);
+    // Fallback to static list if fetch fails
+    const fallbackCourses = [
+      'Power BI', 'Web Development', 'Accounting Fundamentals', 'Corporate Finance',
+      'Advanced MS Excel', 'ERP Development', 'IELTS Preparation', 'Python Programming',
+      'QuickBooks', 'English Speaking', 'SAP', 'Interview Skills', 'IFRS', 'AWS'
+    ];
+    const select = document.getElementById('courseInterest');
+    select.innerHTML = '<option value="" disabled selected>Select a course…</option>';
+    fallbackCourses.forEach(course => {
+      const option = document.createElement('option');
+      option.value = course;
+      option.textContent = course;
+      select.appendChild(option);
+    });
+  }
+}
+
+// Load courses on page load
+document.addEventListener('DOMContentLoaded', loadCourses);
+
 // Password toggles
 function setupToggle(btnId, inputId) {
   document.getElementById(btnId).addEventListener("click", function () {

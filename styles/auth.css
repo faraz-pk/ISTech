@@ -244,6 +244,7 @@
 .auth-form-inner {
   width: 100%;
   max-width: 440px;
+  padding-bottom: 150px;
 }
 
 .auth-form-header {

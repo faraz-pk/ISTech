@@ -69,7 +69,8 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         // DEPLOYMENT NOTE: This API endpoint will change to your production domain
         // For example: "https://istech.com/api/auth/login" or "https://api.istech.com/api/auth/login"
-          const response = await fetch("http://localhost:5001/api/auth/login", {
+        //! Checkpoint
+        const response = await fetch("http://localhost:5001/api/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -176,44 +177,54 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("forgotModal").classList.add("hidden");
   });
 
-  document.getElementById("forgotForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  document
+    .getElementById("forgotForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const email = document.getElementById("forgotEmail").value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      document.getElementById("forgotEmailError").textContent = "Valid email required";
-      return;
-    }
-    document.getElementById("forgotEmailError").textContent = "";
-
-    const btn = document.getElementById("forgotBtn");
-    const txt = document.getElementById("forgotBtnText");
-    btn.disabled = true;
-    txt.textContent = "Sending…";
-
-    try {
-      // DEPLOYMENT NOTE: This API endpoint will change to your production domain
-      // For example: "https://istech.com/api/auth/forgot-password" or "https://api.istech.com/api/auth/forgot-password"
-        const response = await fetch("http://localhost:5001/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        NotificationManager.show("Reset link sent to your email!", "success");
-        document.getElementById("forgotModal").classList.add("hidden");
-      } else {
-        NotificationManager.show(data.message || "Error sending reset link", "error");
+      const email = document.getElementById("forgotEmail").value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        document.getElementById("forgotEmailError").textContent =
+          "Valid email required";
+        return;
       }
-    } catch (error) {
-      NotificationManager.show("Error: " + error.message, "error");
-    } finally {
-      btn.disabled = false;
-      txt.textContent = "Send Reset Link";
-    }
-  });
+      document.getElementById("forgotEmailError").textContent = "";
+
+      const btn = document.getElementById("forgotBtn");
+      const txt = document.getElementById("forgotBtnText");
+      btn.disabled = true;
+      txt.textContent = "Sending…";
+
+      try {
+        // DEPLOYMENT NOTE: This API endpoint will change to your production domain
+        // For example: "https://istech.com/api/auth/forgot-password" or "https://api.istech.com/api/auth/forgot-password"
+        //! Checkpoint
+        const response = await fetch(
+          "http://localhost:5001/api/auth/forgot-password",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          },
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          NotificationManager.show("Reset link sent to your email!", "success");
+          document.getElementById("forgotModal").classList.add("hidden");
+        } else {
+          NotificationManager.show(
+            data.message || "Error sending reset link",
+            "error",
+          );
+        }
+      } catch (error) {
+        NotificationManager.show("Error: " + error.message, "error");
+      } finally {
+        btn.disabled = false;
+        txt.textContent = "Send Reset Link";
+      }
+    });
 });
